@@ -1,0 +1,94 @@
+/* The body */
+
+#afm-body {
+    height: 100%;
+}
+
+
+/* The sidebar menu */
+
+#afm-sidebar {
+    display: inline-block;
+    height: 90%;
+    width: 20%;
+    background-color: #f9f9f9;
+    background: rgba(240, 240, 240, 1);
+    background: -moz-linear-gradient(left, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    background: -webkit-gradient(left top, right top, color-stop(0%, rgba(240, 240, 240, 1)), color-stop(100%, rgba(246, 246, 246, 1)));
+    background: -webkit-linear-gradient(left, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    background: -o-linear-gradient(left, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    background: -ms-linear-gradient(left, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    background: linear-gradient(to right, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#f0f0f0', endColorstr='#f6f6f6', GradientType=1);
+    -webkit-box-shadow: 3px 3px 10px -5px rgba(0, 0, 0, 0.46);
+    -moz-box-shadow: 3px 3px 10px -5px rgba(0, 0, 0, 0.46);
+    box-shadow: 3px 3px 10px -5px rgba(0, 0, 0, 0.46);
+    vertical-align: top;
+}
+
+.afm-sidebar-item {
+    padding: 5 0 5 20;
+}
+
+.afm-sidebar-item:hover {
+    background-color: #e9e9e9;
+}
+
+.afm-sidebar-item img {
+    height: 26px;
+    width: 26px;
+}
+
+.afm-sidebar-item span {
+    vertical-align: super;
+}
+
+
+/* The Toolbar menu */
+
+#afm-toolbar {
+    vertical-align: top;
+    width: 100%;
+    height: 40px;
+    margin: 10px 0;
+    background: rgba(240, 240, 240, 1);
+    background: -moz-linear-gradient(top, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(240, 240, 240, 1)), color-stop(100%, rgba(246, 246, 246, 1)));
+    background: -webkit-linear-gradient(top, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    background: -o-linear-gradient(top, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    background: -ms-linear-gradient(top, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    background: linear-gradient(to bottom, rgba(240, 240, 240, 1) 0%, rgba(246, 246, 246, 1) 100%);
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#f0f0f0', endColorstr='#f6f6f6', GradientType=0);
+    -webkit-box-shadow: 0px 3px 10px -5px rgba(0, 0, 0, 0.46);
+    -moz-box-shadow: 0px 3px 10px -5px rgba(0, 0, 0, 0.46);
+    box-shadow: 0px 3px 10px -5px rgba(0, 0, 0, 0.46);
+}
+
+.afm-toolbar-item {
+    height: 20px;
+    display: inline-block;
+    vertical-align: sub;
+    padding: 10 10;
+}
+
+.afm-toolbar-item:hover {
+    background-color: #e9e9e9;
+}
+
+.afm-toolbar-item img {
+    height: 20px;
+    width: 20px;
+}
+
+
+/* The Content */
+
+#afm-content {
+    display: inline-block;
+    margin: 0 20px;
+    width: 75%;
+}
+
+.afm-right {
+    text-align: right;
+}
