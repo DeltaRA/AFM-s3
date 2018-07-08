@@ -94,8 +94,8 @@
 
 #afm-content {
     display: inline-block;
-    margin: 0 20px;
-    width: 75%;
+    margin: 0 0 0 20px;
+    width: 78%;
 }
 
 .afm-right-table {
@@ -117,4 +117,8 @@ td>img {
     vertical-align: sub;
     height: 20px;
     width: 20px;
+}
+
+.dataTables_scrollBody {
+    min-height: 85vh;
 }

@@ -2,10 +2,10 @@
     "root": [
         { "id": "Folder A/", "name": "Folder A", "size": "10 MB", "date": "23.06.2018 13:47", "icon": "folder" },
         { "id": "Folder B/", "name": "Folder B", "size": "10 MB", "date": "23.06.2018 13:47", "icon": "folder" },
-        { "id": "Folder C/", "name": "Folder C", "size": "10 MB", "date": "23.06.2018 13:47", "icon": "folder" },
+        { "id": "Folder C/", "name": "Folder C", "size": "10 MB", "date": "01.11.2018 13:22", "icon": "folder" },
         { "id": "Folder D/", "name": "Folder D", "size": "10 MB", "date": "23.06.2018 13:47", "icon": "folder" },
         { "id": "blabla.txt", "name": "blabla.txt", "size": "103 KB", "date": "23.06.2018 12:22", "icon": "txt" },
-        { "id": "bibbia.txt", "name": "bibbia.txt", "size": "100 MB", "date": "23.06.2018 13:47", "icon": "txt" },
+        { "id": "bibbia.txt", "name": "bibbia.txt", "size": "100 MB", "date": "23.06.2017 13:47", "icon": "txt" },
         { "id": "grasso.zip", "name": "grasso.zip", "size": "883 MB", "date": "03.03.2018 11:35", "icon": "archive" },
         { "id": "img.png", "name": "img.png", "size": "3.2 MB", "date": "23.06.2018 13:47", "icon": "image" },
         { "id": "photo.jpg", "name": "photo.jpg", "size": "10 MB", "date": "14.04.2018 21:24", "icon": "image" },

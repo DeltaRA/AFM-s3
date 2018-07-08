@@ -2,7 +2,6 @@
 /********************************/
 $(document).ready(function() {
     $.getJSON("test/data.json", function(data) {
-        console.log(data['root']);
         $.each(data, function(key, val) {
             if (key == 'root') {
                 for (let index = 0; index < val.length; index++) {
@@ -23,16 +22,122 @@ $(document).ready(function() {
 
     });
 });
+/********************************/
 
+// Table Sorting
+/********************************/
+jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+    "de_datetime-asc": function(a, b) {
+        var x, y;
+        if (jQuery.trim(a) !== '') {
+            var deDatea = jQuery.trim(a).split(' ');
+            var deTimea = deDatea[1].split(':');
+            var deDatea2 = deDatea[0].split('.');
+            if (typeof deTimea[2] != 'undefined') {
+                x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1] + deTimea[2]) * 1;
+            } else {
+                x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1]) * 1;
+            }
+        } else {
+            x = -Infinity; // = l'an 1000 ...
+        }
+
+        if (jQuery.trim(b) !== '') {
+            var deDateb = jQuery.trim(b).split(' ');
+            var deTimeb = deDateb[1].split(':');
+            deDateb = deDateb[0].split('.');
+            if (typeof deTimeb[2] != 'undefined') {
+                y = (deDateb[2] + deDateb[1] + deDateb[0] + deTimeb[0] + deTimeb[1] + deTimeb[2]) * 1;
+            } else {
+                y = (deDateb[2] + deDateb[1] + deDateb[0] + deTimeb[0] + deTimeb[1]) * 1;
+            }
+        } else {
+            y = -Infinity;
+        }
+        var z = ((x < y) ? -1 : ((x > y) ? 1 : 0));
+        return z;
+    },
+
+    "de_datetime-desc": function(a, b) {
+        var x, y;
+        if (jQuery.trim(a) !== '') {
+            var deDatea = jQuery.trim(a).split(' ');
+            var deTimea = deDatea[1].split(':');
+            var deDatea2 = deDatea[0].split('.');
+            if (typeof deTimea[2] != 'undefined') {
+                x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1] + deTimea[2]) * 1;
+            } else {
+                x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1]) * 1;
+            }
+        } else {
+            x = Infinity;
+        }
+
+        if (jQuery.trim(b) !== '') {
+            var deDateb = jQuery.trim(b).split(' ');
+            var deTimeb = deDateb[1].split(':');
+            deDateb = deDateb[0].split('.');
+            if (typeof deTimeb[2] != 'undefined') {
+                y = (deDateb[2] + deDateb[1] + deDateb[0] + deTimeb[0] + deTimeb[1] + deTimeb[2]) * 1;
+            } else {
+                y = (deDateb[2] + deDateb[1] + deDateb[0] + deTimeb[0] + deTimeb[1]) * 1;
+            }
+        } else {
+            y = -Infinity;
+        }
+        var z = ((x < y) ? 1 : ((x > y) ? -1 : 0));
+        return z;
+    }
+});
+jQuery.fn.dataTable.ext.type.order['file-size-pre'] = function(data) {
+    var matches = data.match(/^(\d+(?:\.\d+)?)\s*([a-z]+)/i);
+    var multipliers = {
+        b: 1,
+        bytes: 1,
+        kb: 1000,
+        kib: 1024,
+        mb: 1000000,
+        mib: 1048576,
+        gb: 1000000000,
+        gib: 1073741824,
+        tb: 1000000000000,
+        tib: 1099511627776,
+        pb: 1000000000000000,
+        pib: 1125899906842624
+    };
+
+    if (matches) {
+        var multiplier = multipliers[matches[2].toLowerCase()];
+        return parseFloat(matches[1]) * multiplier;
+    } else {
+        return -1;
+    };
+};
+jQuery.fn.dataTable.ext.type.order['file-pre'] = function(data) {
+    var tmp = data.search('<img src="img/icons/icons8-folder.png">');
+    if (tmp != -1) {
+        return data.split('">')[1];
+    } else {
+        return '<' + data.split('">')[1];
+    }
+
+};
+/********************************/
+
+//Create table
+/********************************/
 function createTable() {
     $('#file-list').DataTable({
-        "scrollY": "80vh",
+        "scrollY": "85vh",
         "scrollCollapse": true,
         "paging": false,
         "info": false,
         "searching": false,
         "columnDefs": [
             { className: "afm-right-table", "targets": [1, 2] },
+            { type: 'file-size', targets: 2 },
+            { type: 'de_datetime', targets: 1 },
+            { type: 'file', targets: 0 }
         ]
     });
 
