@@ -1,25 +1,34 @@
 // initialisation
 /********************************/
+var viewMode = 0; // 0 = List, 1 = Square
+var dataTable, json, json_tmp;
+var path_folder = ['root'];
+var path_position = 0;
+
 $(document).ready(function() {
-    $.getJSON("test/data.json", function(data) {
-        $.each(data, function(key, val) {
-            if (key == 'root') {
-                for (let index = 0; index < val.length; index++) {
-                    if (val[index]['id'].slice(-1) == '/') {
-                        $('#afm-sidebar').append('<div class="afm-sidebar-item"><img src="img/icons/icons8-folder.png" /><span>' + val[index]['name'] + '</span></div>')
-                        $('tbody').append('<tr ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragExit(event)" draggable="true" ondragstart="drag(event)"><td><img src="img/icons/icons8-' + val[index]['icon'] + '.png" /> ' + val[index]['name'] + '</td><<td>' + val[index]['date'] + '</td><td>' + val[index]['size'] + '</td></tr>');
-                        $('#afm-square').append('<div class="afm-square-item" ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragExit(event)" draggable="true" ondragstart="drag(event)"><img draggable="false" src="img/icons/icons8-' + val[index]['icon'] + '.png" /><p>' + val[index]['name'] + '</p></div>');
-                    } else {
-                        $('tbody').append('<tr draggable="true" ondragstart="drag(event)"><td><img src="img/icons/icons8-' + val[index]['icon'] + '.png" /> ' + val[index]['name'] + '</td><<td>' + val[index]['date'] + '</td><td>' + val[index]['size'] + '</td></tr>');
-                        $('#afm-square').append('<div class="afm-square-item" draggable="true" ondragstart="drag(event)"><img draggable="false" src="img/icons/icons8-' + val[index]['icon'] + '.png" /><p>' + val[index]['name'] + '</p></div>');
-                    }
-                }
+    $.getJSON("api/getData.php", function(data) {
+        console.log(data);
+        json = data;
+        json_tmp = json['root'].slice();
+        json_tmp.reverse();
+        for (let i = 0; i < json_tmp.length; i++) {
+            if (json_tmp[i]['id'].slice(-1) == '/') {
+                $('#afm-sidebar').append('<div class="afm-sidebar-item" data-file-path="' + json_tmp[i]['id'] + '"><img src="img/icons/icons8-folder.png" /><span> ' + json_tmp[i]['name'] + '</span></div>')
             }
-
-            createTable();
-        });
-
-
+            addRow(json_tmp[i]);
+        }
+        var sidebar = document.getElementsByClassName("afm-sidebar-item");
+        var dblclickSquare = function() {
+            path_position++
+            if (path_position <= path_folder.length) {
+                path_folder = path_folder.slice(0, path_position + 1);
+            }
+            openFolder(this.getAttribute('data-file-path'))
+        };
+        for (var i = 0; i < sidebar.length; i++) {
+            sidebar[i].addEventListener('click', dblclickSquare, false);
+        }
+        createTable();
     });
 });
 /********************************/
@@ -39,7 +48,7 @@ jQuery.extend(jQuery.fn.dataTableExt.oSort, {
                 x = (deDatea2[2] + deDatea2[1] + deDatea2[0] + deTimea[0] + deTimea[1]) * 1;
             }
         } else {
-            x = -Infinity; // = l'an 1000 ...
+            x = -Infinity;
         }
 
         if (jQuery.trim(b) !== '') {
@@ -116,9 +125,9 @@ jQuery.fn.dataTable.ext.type.order['file-size-pre'] = function(data) {
 jQuery.fn.dataTable.ext.type.order['file-pre'] = function(data) {
     var tmp = data.search('<img src="img/icons/icons8-folder.png">');
     if (tmp != -1) {
-        return data.split('">')[1];
+        return data.split('">')[1].toLowerCase();
     } else {
-        return '<' + data.split('">')[1];
+        return '<' + data.split('">')[1].toLowerCase();
     }
 
 };
@@ -127,22 +136,35 @@ jQuery.fn.dataTable.ext.type.order['file-pre'] = function(data) {
 //Create table
 /********************************/
 function createTable() {
-    $('#file-list').DataTable({
+    dataTable = $('#file-list').DataTable({
         "scrollY": "85vh",
         "scrollCollapse": true,
         "paging": false,
         "info": false,
         "searching": false,
-        "columnDefs": [
-            { className: "afm-right-table", "targets": [1, 2] },
-            { type: 'file-size', targets: 2 },
-            { type: 'de_datetime', targets: 1 },
-            { type: 'file', targets: 0 }
+        select: true,
+        "columnDefs": [{
+                className: "afm-right-table",
+                "targets": [1, 2]
+            },
+            {
+                type: 'file-size',
+                targets: 2
+            },
+            {
+                type: 'de_datetime',
+                targets: 1
+            },
+            {
+                type: 'file',
+                targets: 0
+            }
         ]
     });
 
     var squares = document.getElementsByClassName("afm-square-item");
-
+    var fSquares = document.getElementsByClassName("afm-square-item-folder");
+    var list = document.getElementsByClassName("afm-list-item-folder");
     var focusSquare = function() {
         var self = this;
         if (self.style.backgroundColor == 'rgb(233, 233, 233)') {
@@ -152,9 +174,31 @@ function createTable() {
         }
 
     };
-
+    var dblclickSquare = function() {
+        path_position++;
+        if (path_position <= path_folder.length) {
+            path_folder = path_folder.slice(0, path_position + 1);
+        }
+        openFolder(this.getAttribute('data-file-path'))
+    };
     for (var i = 0; i < squares.length; i++) {
         squares[i].addEventListener('click', focusSquare, false);
+
+    }
+    for (let i = 0; i < list.length; i++) {
+        fSquares[i].addEventListener('dblclick', dblclickSquare, false);
+        list[i].addEventListener('dblclick', dblclickSquare, false);
+    }
+
+}
+
+function addRow(data) {
+    if (data['id'].slice(-1) == '/') {
+        $('#afm-file-body').append('<tr class="afm-list-item afm-list-item-folder" ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragExit(event)" draggable="true" ondragstart="drag(event)" data-file-path="' + data['id'] + '"><td><img src="img/icons/icons8-' + data['icon'] + '.png" /> ' + data['name'] + '</td><<td>' + data['date'] + '</td><td>' + data['size']['value'] + '</td></tr>');
+        $('#afm-square').append('<div class="afm-square-item afm-square-item-folder" ondrop="drop(event)" ondragenter="dragEnter(event)" ondragleave="dragExit(event)" draggable="true" ondragstart="drag(event)" data-file-path="' + data['id'] + '"><img draggable="false" src="img/icons/icons8-' + data['icon'] + '.png" /><p>' + data['name'] + '</p></div>');
+    } else {
+        $('#afm-file-body').append('<tr class="afm-list-item"  draggable="true" ondragstart="drag(event)" data-file-path="' + data['id'] + '"><td><img src="img/icons/icons8-' + data['icon'] + '.png" /> ' + data['name'] + '</td><<td>' + data['date'] + '</td><td>' + data['size']['value'] + '</td></tr>');
+        $('#afm-square').append('<div class="afm-square-item" draggable="true" ondragstart="drag(event)" data-file-path="' + data['id'] + '"><img draggable="false" src="img/icons/icons8-' + data['icon'] + '.png" /><p>' + data['name'] + '</p></div>');
     }
 }
 /********************************/
@@ -164,11 +208,23 @@ function createTable() {
 function toggleViewSquare() {
     document.getElementById("file-list_wrapper").style.display = 'none';
     document.getElementById("afm-square").style.display = 'block';
+
+    viewMode = 1;
 }
 
 function toggleViewList() {
     document.getElementById("file-list_wrapper").style.display = 'block';
     document.getElementById("afm-square").style.display = 'none';
+
+    viewMode = 0;
+}
+
+function openNewFolder() {
+    document.getElementById("afm-new-folder").style.display = 'flex';
+}
+
+function closeNewFolder() {
+    document.getElementById("afm-new-folder").style.display = 'none';
 }
 /********************************/
 
@@ -176,7 +232,7 @@ function toggleViewList() {
 /********************************/
 function dragEnter(ev) {
     ev.preventDefault();
-    if (ev.fromElement.tagName != "TD") {
+    if (viewMode == 1) {
         for (let index = 0; index < ev.path.length; index++) {
             if (ev.path[index].classList != null) {
                 if (ev.path[index].classList[0] == 'afm-square-item') {
@@ -187,6 +243,7 @@ function dragEnter(ev) {
 
         }
     } else {
+
         ev.path[1].style.backgroundColor = "#e9e9e9";
     }
 
@@ -194,7 +251,7 @@ function dragEnter(ev) {
 
 function dragExit(ev) {
     ev.preventDefault();
-    if (ev.fromElement.tagName != "TD") {
+    if (viewMode == 1) {
         for (let index = 0; index < ev.path.length; index++) {
             if (ev.path[index].classList != null) {
                 if (ev.path[index].classList[0] == 'afm-square-item') {
@@ -205,6 +262,7 @@ function dragExit(ev) {
 
         }
     } else {
+        console.log(ev.path);
         ev.path[1].style.backgroundColor = "#ffffff";
     }
 }
@@ -220,3 +278,109 @@ function drop(ev) {
     //ev.target.appendChild(document.getElementById(data));
 }
 /********************************/
+
+//Events
+/********************************/
+
+function openFolder(id) {
+    path_folder[path_position] = id;
+
+    dataTable.clear().draw();
+    dataTable.destroy();
+    var myNode = document.getElementById("afm-square");
+    while (myNode.firstChild) {
+        myNode.removeChild(myNode.firstChild);
+    }
+    var myNode = document.getElementById("afm-file-body");
+    while (myNode.firstChild) {
+        myNode.removeChild(myNode.firstChild);
+    }
+    json_tmp = json[id].slice();
+    json_tmp.reverse();
+
+    for (let i = 0; i < json_tmp.length; i++) {
+        addRow(json_tmp[i]);
+
+    }
+    createTable();
+    if (viewMode == 1) {
+        toggleViewSquare();
+    } else {
+        toggleViewList();
+    }
+}
+
+function back() {
+    if (path_position != 0) {
+        path_position--;
+        openFolder(path_folder[path_position]);
+    }
+}
+
+function forward() {
+    if (path_position != path_folder.length - 1) {
+        path_position++;
+        openFolder(path_folder[path_position]);
+    }
+}
+
+function newFolder() {
+    var name = $("#new_folder").val();
+    if (name.length < 1 || name == ' ' || name == null) {
+        alert('Error create folder');
+    } else {
+        if (path_folder[path_position] == 'root') {
+            var path = name + '/';
+        } else {
+            var path = path_folder[path_position] + '' + name + '/';
+        }
+
+        $.post("api/newFolder.php", {
+            p: path
+        }, function(result) {
+            if (result != '') {
+                console.log('Error new folder:' + result)
+            }
+        });
+        closeNewFolder();
+    }
+
+}
+
+function download() {
+    var path;
+    var selected = document.getElementsByClassName("afm-list-item selected");
+    var link = document.createElement('a');
+
+    link.setAttribute('download', null);
+    link.setAttribute('target', '_blank');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+
+    for (let i = 0; i < selected.length; i++) {
+        path = selected[i].getAttribute('data-file-path');
+        if (path.substr(path.length - 1) != '/') {
+            $.post("api/download.php", {
+                p: path,
+                f: 0
+            }, function(result) {
+                var tmp = path.split('/');
+                link.setAttribute('download', tmp[tmp.length - 1]);
+                link.setAttribute('href', result);
+                link.click();
+            });
+        } else {
+            $.post("api/download.php", {
+                p: path,
+                f: 1
+            }, function(result) {
+                var tmp = path.split('/');
+                link.setAttribute('download', tmp[tmp.length - 2]);
+                link.setAttribute('href', result);
+                link.click();
+            });
+        }
+
+    }
+    document.body.removeChild(link);
+}
