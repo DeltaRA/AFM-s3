@@ -75,9 +75,11 @@ function getFolders($folders, $data)
                 }
             }
         } else {
-            $data[$folder][] = array("id" => $folder."/empty_folder", "name" => 'empty_folder', "size" => array("value"=>0,'bytes'=>0), "date" => $date, "icon" => 'file');
+            $data[$folder][] = array("id" => $folder."/empty_folder", "name" => 'empty_folder', "size" => array("value"=>0,'bytes'=>0), "date" => "-", "icon" => 'file');
         }
-
+        if($date == '01.01.1970 00:00:00'){
+            $date = '-';
+        }
         $name = explode('/', $folder);
         $name = $name[Count($name) - 2];
         $x = (strlen($name) + 1) * -1;

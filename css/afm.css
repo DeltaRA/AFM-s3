@@ -2,6 +2,11 @@
 
 #afm-body {
     height: 100%;
+    font-family: "Proxima Nova", "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.context-menu-item span {
+    font-family: "Proxima Nova", "Helvetica Neue", Arial, sans-serif !important
 }
 
 .afm-right {
@@ -142,6 +147,9 @@ td>img {
     cursor: pointer;
 }
 
+
+/* Modal new */
+
 .afm-new {
     background: #0097A7;
     z-index: 100;
@@ -174,6 +182,7 @@ td>img {
     font-family: "Roboto", sans-serif;
     color: white;
     font-size: 18px;
+    list-style-type: none;
 }
 
 .afm-new li span {
@@ -224,4 +233,60 @@ td>img {
 button:focus,
 input:focus {
     outline: 0;
+}
+
+.afm-rename {
+    display: none;
+    position: absolute;
+}
+
+
+/* Loading */
+
+#afm-loading {
+    position: absolute;
+    z-index: 100;
+    width: 80%;
+    height: calc(90% + 40px);
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.afm-ring-2 {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    width: 45px;
+    height: 45px;
+    border: 4px solid #4b9cdb;
+    border-radius: 100%;
+}
+
+.afm-ball-holder {
+    position: absolute;
+    width: 12px;
+    height: 45px;
+    left: 17px;
+    top: 0px;
+    animation: loadingE 1.3s linear infinite;
+    opacity: 1;
+}
+
+.afm-ball {
+    position: absolute;
+    top: -11px;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 100%;
+    background: #4282B3;
+    opacity: 1;
+}
+
+@keyframes loadingE {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

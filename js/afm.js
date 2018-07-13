@@ -30,6 +30,59 @@ $(document).ready(function() {
         }
         createTable();
     });
+
+    $.contextMenu({
+        selector: '#afm-content',
+        callback: function(key, options) {
+            switch (key) {
+                case 'edit':
+                    rename();
+                    break;
+                case 'cut':
+                    console.log('cu')
+                    break;
+                case 'copy':
+                    console.log('co')
+                    break;
+                case 'paste':
+                    console.log('p')
+                    break;
+                case 'download':
+                    download();
+                    break;
+
+                default:
+                    break;
+            }
+        },
+        items: {
+            "edit": {
+                name: "Rename",
+                icon: "fas fa-edit"
+            },
+            "cut": {
+                name: "Cut",
+                icon: "fas fa-cut"
+            },
+            copy: {
+                name: "Copy",
+                icon: "fas fa-copy"
+            },
+            "paste": {
+                name: "Paste",
+                icon: "fas fa-paste"
+            },
+            "sep1": "---------",
+            "download": {
+                name: "Download",
+                icon: "fas fa-download"
+            },
+        }
+    });
+
+    $('.context-menu-one').on('click', function(e) {
+        console.log('clicked', this);
+    })
 });
 /********************************/
 
@@ -133,9 +186,10 @@ jQuery.fn.dataTable.ext.type.order['file-pre'] = function(data) {
 };
 /********************************/
 
-//Create table
+//Table e data
 /********************************/
 function createTable() {
+    console.log(json['root']);
     dataTable = $('#file-list').DataTable({
         "scrollY": "85vh",
         "scrollCollapse": true,
@@ -189,7 +243,7 @@ function createTable() {
         fSquares[i].addEventListener('dblclick', dblclickSquare, false);
         list[i].addEventListener('dblclick', dblclickSquare, false);
     }
-
+    stopLoading();
 }
 
 function addRow(data) {
@@ -200,6 +254,16 @@ function addRow(data) {
         $('#afm-file-body').append('<tr class="afm-list-item"  draggable="true" ondragstart="drag(event)" data-file-path="' + data['id'] + '"><td><img src="img/icons/icons8-' + data['icon'] + '.png" /> ' + data['name'] + '</td><<td>' + data['date'] + '</td><td>' + data['size']['value'] + '</td></tr>');
         $('#afm-square').append('<div class="afm-square-item" draggable="true" ondragstart="drag(event)" data-file-path="' + data['id'] + '"><img draggable="false" src="img/icons/icons8-' + data['icon'] + '.png" /><p>' + data['name'] + '</p></div>');
     }
+}
+
+function reload() {
+    $.getJSON("api/getData.php", function(data) {
+        json = data;
+        json_tmp = json['root'].slice();
+        json_tmp.reverse();
+        openFolder(path_folder[path_position]);
+        stopLoading();
+    });
 }
 /********************************/
 
@@ -220,11 +284,26 @@ function toggleViewList() {
 }
 
 function openNewFolder() {
+
     document.getElementById("afm-new-folder").style.display = 'flex';
 }
 
 function closeNewFolder() {
+    $("#new_folder").val("");
     document.getElementById("afm-new-folder").style.display = 'none';
+}
+
+function closeRename() {
+    $("#new_name").val("");
+    document.getElementById("afm-rename").style.display = 'none';
+}
+
+function startLoading() {
+    document.getElementById("afm-loading").style.display = 'block';
+}
+
+function stopLoading() {
+    document.getElementById("afm-loading").style.display = 'none';
 }
 /********************************/
 
@@ -279,7 +358,7 @@ function drop(ev) {
 }
 /********************************/
 
-//Events
+// AWS Commands
 /********************************/
 
 function openFolder(id) {
@@ -329,20 +408,26 @@ function newFolder() {
     if (name.length < 1 || name == ' ' || name == null) {
         alert('Error create folder');
     } else {
-        if (path_folder[path_position] == 'root') {
-            var path = name + '/';
-        } else {
-            var path = path_folder[path_position] + '' + name + '/';
-        }
+        if (checkString(name)) {
 
-        $.post("api/newFolder.php", {
-            p: path
-        }, function(result) {
-            if (result != '') {
-                console.log('Error new folder:' + result)
+            if (path_folder[path_position] == 'root') {
+                var path = name + '/';
+            } else {
+                var path = path_folder[path_position] + '' + name + '/';
             }
-        });
-        closeNewFolder();
+            closeNewFolder();
+            startLoading();
+            var date = new Date();
+            var d = date.getDate() + '.' + date.getMonth() + '.' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+            $.post("api/newFolder.php", {
+                p: path
+            }, function(result) {
+                if (result != '') {
+                    console.log('Error new folder:' + result)
+                }
+                reload();
+            });
+        }
     }
 
 }
@@ -383,4 +468,32 @@ function download() {
 
     }
     document.body.removeChild(link);
+}
+
+function rename() {
+    var selected = document.getElementsByClassName("afm-list-item selected");
+    if (selected.length == 1) {
+        var rect = selected[0].getBoundingClientRect();;
+        document.getElementById("afm-rename").style.top = rect.top + 30;
+        document.getElementById("afm-rename").style.left = rect.left;
+        document.getElementById("afm-rename").style.display = 'flex';
+    } else {
+        alert('Select one row');
+    }
+}
+
+/********************************/
+
+//Controller
+/********************************/
+
+//Check valid char in according to AWS: https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html
+function checkString(string) {
+    var letters = /[^A-Za-z0-9!()._-]/g;
+    if (string.match(letters) == null) {
+        return true;
+    } else {
+        alert('invalid char')
+        return false;
+    }
 }

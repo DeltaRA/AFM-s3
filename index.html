@@ -5,10 +5,26 @@
     <link rel="stylesheet" href="plugins/fontawesome/css/all.css">
     <link rel="stylesheet" type="text/css" href="plugins/DataTables/DataTables-1.10.18/css/jquery.datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="plugins/DataTables/Select-1.2.6/css/select.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="plugins/contextMenu/jquery.contextMenu.min.css">
 </head>
 
 <body style="width: 80%; margin: 0 auto;">
     <div id="afm-body">
+        <div id="afm-loading">
+            <div class="afm-ring-2">
+                <div class="afm-ball-holder">
+                    <div class="afm-ball"></div>
+                </div>
+            </div>
+        </div>
+        <ul class="afm-new" id="afm-rename">
+            <li>
+                <span>Name:</span>
+                <input type="text" name="name" id="new_name" autocomplete="off">
+                <button class="afm-button" type="button" onclick="rename()">Confirm</button>
+            </li>
+            <div class="afm-new-close" onclick="closeRename()"><i class="fas fa-times"></i></div>
+        </ul>
         <div id="afm-toolbar">
             <div class="afm-toolbar-item" onclick="back()">
                 <i class="fas fa-arrow-left"></i>
@@ -23,7 +39,7 @@
             <ul class="afm-new" id="afm-new-folder">
                 <li>
                     <span>Name:</span>
-                    <input type="text" name="folder" id="new_folder">
+                    <input type="text" name="folder" id="new_folder" autocomplete="off">
                     <button class="afm-button" type="button" onclick="newFolder()">Confirm</button>
                 </li>
                 <div class="afm-new-close" onclick="closeNewFolder()"><i class="fas fa-times"></i></div>
@@ -52,7 +68,7 @@
         <div id="afm-content">
             <div id="afm-square">
             </div>
-            <table id="file-list" class="hover row-border" style="width:75%;">
+            <table id="file-list" class="hover row-border">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -69,6 +85,8 @@
 <script type="text/javascript" src="plugins/jquery/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="plugins/DataTables/DataTables-1.10.18/js/jquery.datatables.min.js"></script>
 <script type="text/javascript" src="plugins/DataTables/Select-1.2.6/js/dataTables.select.min.js"></script>
+<script type="text/javascript" src="plugins/contextMenu/jquery.contextMenu.min.js"></script>
+<script type="text/javascript" src="plugins/contextMenu/jquery.ui.position.min.js"></script>
 <script type="text/javascript" src="js/afm.js"></script>
 
 </html>
