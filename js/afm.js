@@ -1,13 +1,17 @@
 // initialisation
 /********************************/
 var viewMode = 0; // 0 = List, 1 = Square
-var dataTable, json, json_tmp;
+var dataTable, json, json_tmp, myDropzone;
 var path_folder = ['root'];
 var path_position = 0;
+var fileToRename = null;
+var uploadFolder = Math.random().toString(36).substr(2, 9);
+var filesToUpload = 0;
+
+
 
 $(document).ready(function() {
     $.getJSON("api/getData.php", function(data) {
-        console.log(data);
         json = data;
         json_tmp = json['root'].slice();
         json_tmp.reverse();
@@ -36,21 +40,23 @@ $(document).ready(function() {
         callback: function(key, options) {
             switch (key) {
                 case 'edit':
-                    rename();
+                    openRename();
                     break;
                 case 'cut':
-                    console.log('cu')
+
                     break;
                 case 'copy':
-                    console.log('co')
+
                     break;
                 case 'paste':
-                    console.log('p')
+
                     break;
                 case 'download':
                     download();
                     break;
-
+                case 'delete':
+                    deleteFile();
+                    break;
                 default:
                     break;
             }
@@ -60,29 +66,75 @@ $(document).ready(function() {
                 name: "Rename",
                 icon: "fas fa-edit"
             },
-            "cut": {
-                name: "Cut",
-                icon: "fas fa-cut"
-            },
-            copy: {
-                name: "Copy",
-                icon: "fas fa-copy"
-            },
-            "paste": {
-                name: "Paste",
-                icon: "fas fa-paste"
-            },
+            /*             "sep0": "---------",
+                        "cut": {
+                            name: "Cut",
+                            icon: "fas fa-cut"
+                        },
+                        copy: {
+                            name: "Copy",
+                            icon: "fas fa-copy"
+                        },
+                        "paste": {
+                            name: "Paste",
+                            icon: "fas fa-paste"
+                        }, */
             "sep1": "---------",
+            "delete": {
+                name: "Delete",
+                icon: "fas fa-trash-alt"
+            },
+            "sep2": "---------",
             "download": {
                 name: "Download",
                 icon: "fas fa-download"
             },
         }
     });
+});
+/********************************/
 
-    $('.context-menu-one').on('click', function(e) {
-        console.log('clicked', this);
-    })
+// Dropzone configuration 
+/********************************/
+Dropzone.autoDiscover = false;
+$(function() {
+    myDropzone = new Dropzone("#dz-upload");
+    myDropzone.on("sending", function(file) {
+        filesToUpload++;
+        var name = file.fullPath;
+        if (typeof(file.fullPath) === "undefined") {
+            name = file.name;
+        }
+        name = uploadFolder + '/' + name;
+        $("#tmp-path").html('<input type="hidden" name="path" value="' + name + '" />')
+    });
+    myDropzone.on("success", function(file) {
+        var name = file.fullPath;
+        if (typeof(file.fullPath) === "undefined") {
+            name = file.name;
+        }
+        var tmp;
+        if (path_folder[path_position] != 'root') {
+            tmp = path_folder[path_position] + '' + name;
+        } else {
+            tmp = name;
+        }
+        name = uploadFolder + '/' + name;
+        $.post("api/uploadToS3.php", {
+            p: tmp,
+            s: name
+        }, function(result) {
+            if (result != '') {
+                alert('Error:' + result)
+            }
+            filesToUpload--;
+            if (filesToUpload == 0) {
+                closeUpload();
+                startLoading();
+                reload();
+            }
+        });
+    });
 });
 /********************************/
 
@@ -189,7 +241,6 @@ jQuery.fn.dataTable.ext.type.order['file-pre'] = function(data) {
 //Table e data
 /********************************/
 function createTable() {
-    console.log(json['root']);
     dataTable = $('#file-list').DataTable({
         "scrollY": "85vh",
         "scrollCollapse": true,
@@ -220,13 +271,7 @@ function createTable() {
     var fSquares = document.getElementsByClassName("afm-square-item-folder");
     var list = document.getElementsByClassName("afm-list-item-folder");
     var focusSquare = function() {
-        var self = this;
-        if (self.style.backgroundColor == 'rgb(233, 233, 233)') {
-            self.style.backgroundColor = '';
-        } else {
-            self.style.backgroundColor = '#e9e9e9';
-        }
-
+        this.classList.toggle("afm-square-selected");
     };
     var dblclickSquare = function() {
         path_position++;
@@ -296,6 +341,7 @@ function closeNewFolder() {
 function closeRename() {
     $("#new_name").val("");
     document.getElementById("afm-rename").style.display = 'none';
+    fileToRename = null;
 }
 
 function startLoading() {
@@ -304,6 +350,32 @@ function startLoading() {
 
 function stopLoading() {
     document.getElementById("afm-loading").style.display = 'none';
+}
+
+function openRename() {
+    if (viewMode == 0) {
+        fileToRename = document.getElementsByClassName("afm-list-item selected");
+    } else if (viewMode == 1) {
+        fileToRename = document.getElementsByClassName("afm-square-selected");
+    }
+
+    if (fileToRename.length == 1) {
+        var rect = fileToRename[0].getBoundingClientRect();;
+        document.getElementById("afm-rename").style.top = rect.top + 30;
+        document.getElementById("afm-rename").style.left = rect.left;
+        document.getElementById("afm-rename").style.display = 'flex';
+    } else {
+        alert('Select one row');
+    }
+}
+
+function openUpload() {
+    document.getElementById("afm-dropzone").style.display = 'block';
+}
+
+function closeUpload() {
+    myDropzone.removeAllFiles()
+    document.getElementById("afm-dropzone").style.display = 'none';
 }
 /********************************/
 
@@ -341,13 +413,11 @@ function dragExit(ev) {
 
         }
     } else {
-        console.log(ev.path);
         ev.path[1].style.backgroundColor = "#ffffff";
     }
 }
 
 function drag(ev) {
-    console.log(ev);
     //ev.dataTransfer.setData("id", ev.target);
 }
 
@@ -417,13 +487,11 @@ function newFolder() {
             }
             closeNewFolder();
             startLoading();
-            var date = new Date();
-            var d = date.getDate() + '.' + date.getMonth() + '.' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
             $.post("api/newFolder.php", {
                 p: path
             }, function(result) {
                 if (result != '') {
-                    console.log('Error new folder:' + result)
+                    alert('Error:' + result)
                 }
                 reload();
             });
@@ -434,8 +502,13 @@ function newFolder() {
 
 function download() {
     var path;
-    var selected = document.getElementsByClassName("afm-list-item selected");
     var link = document.createElement('a');
+
+    if (viewMode == 0) {
+        var selected = document.getElementsByClassName("afm-list-item selected");
+    } else if (viewMode == 1) {
+        var selected = document.getElementsByClassName("afm-square-selected");
+    }
 
     link.setAttribute('download', null);
     link.setAttribute('target', '_blank');
@@ -471,17 +544,99 @@ function download() {
 }
 
 function rename() {
-    var selected = document.getElementsByClassName("afm-list-item selected");
-    if (selected.length == 1) {
-        var rect = selected[0].getBoundingClientRect();;
-        document.getElementById("afm-rename").style.top = rect.top + 30;
-        document.getElementById("afm-rename").style.left = rect.left;
-        document.getElementById("afm-rename").style.display = 'flex';
+    var name = $("#new_name").val();
+    if (name.length < 1 || name == ' ' || name == null || fileToRename[0] == null) {
+        alert('Error rename');
     } else {
-        alert('Select one row');
+        if (checkString(name)) {
+            startLoading();
+            oldPath = fileToRename[0].getAttribute('data-file-path');
+            closeRename();
+            if (oldPath.substr(oldPath.length - 1) != '/') {
+                var ext = oldPath.split('.');
+                if (path_folder[path_position] == 'root') {
+                    var newPath = name + '.' + ext[ext.length - 1];
+                } else {
+                    var newPath = path_folder[path_position] + '' + name + '.' + ext[ext.length - 1];
+                }
+
+                $.post("api/rename.php", {
+                    o: oldPath,
+                    n: newPath,
+                    f: 0
+                }, function(result) {
+                    if (result != '') {
+                        alert('Error:' + result)
+                    }
+                    reload();
+                });
+            } else {
+
+                if (path_folder[path_position] == 'root') {
+                    var newPath = name + '/';
+                } else {
+                    var newPath = path_folder[path_position] + '' + name + '/';
+                }
+
+                $.post("api/rename.php", {
+                    o: oldPath,
+                    n: newPath,
+                    f: 1
+                }, function(result) {
+                    if (result != '') {
+                        alert('Error:' + result)
+                    }
+                    reload();
+                });
+            }
+        }
     }
 }
 
+function deleteFile() {
+    if (viewMode == 0) {
+        file = document.getElementsByClassName("afm-list-item selected");
+    } else if (viewMode == 1) {
+        file = document.getElementsByClassName("afm-square-selected");
+    }
+    var isDone = 0;
+    if (file.length > 0) {
+        startLoading();
+    } else {
+        alert('There are no selected files')
+    }
+
+    for (let index = 0; index < file.length; index++) {
+        var path = file[index].getAttribute('data-file-path');
+        if (path.substr(path.length - 1) != '/') {
+            $.post("api/delete.php", {
+                p: path,
+                f: 0
+            }, function(result) {
+                if (result != '') {
+                    alert('Error:' + result)
+                }
+                isDone++;
+                if (isDone == file.length) {
+                    reload();
+                }
+            });
+        } else {
+            $.post("api/delete.php", {
+                p: path,
+                f: 1
+            }, function(result) {
+                if (result != '') {
+                    alert('Error:' + result)
+                }
+                isDone++;
+                if (isDone == file.length) {
+                    reload();
+                }
+            });
+        }
+    }
+}
 /********************************/
 
 //Controller
@@ -493,7 +648,7 @@ function checkString(string) {
     if (string.match(letters) == null) {
         return true;
     } else {
-        alert('invalid char')
+        alert('Invalid char')
         return false;
     }
 }

@@ -131,6 +131,11 @@
     width: 19%;
     text-align: center;
     cursor: pointer;
+    word-wrap: break-word;
+}
+
+.afm-square-selected {
+    background-color: #e9e9e9;
 }
 
 td>img {
@@ -221,7 +226,7 @@ td>img {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    margin: 4px 2px;
+    margin: 4px 10px;
     cursor: pointer;
 }
 
@@ -257,7 +262,7 @@ input:focus {
     left: 50%;
     width: 45px;
     height: 45px;
-    border: 4px solid #4b9cdb;
+    border: 4px solid #343a40;
     border-radius: 100%;
 }
 
@@ -278,7 +283,7 @@ input:focus {
     width: 16px;
     height: 16px;
     border-radius: 100%;
-    background: #4282B3;
+    background: #343a40;
     opacity: 1;
 }
 
@@ -288,5 +293,89 @@ input:focus {
     }
     100% {
         transform: rotate(360deg);
+    }
+}
+
+
+/* Dropzone */
+
+#afm-dropzone {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    width: 63.5%;
+    height: 90%;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.dropzone {
+    border: 2px dashed #3498db !important;
+    border-radius: 5px;
+    transition: .2s;
+    margin-top: 50px;
+}
+
+.dropzone.dz-drag-hover {
+    border: 2px solid #3498db !important;
+}
+
+.dz-message.needsclick i {
+    width: 50px;
+    display: block;
+    margin: auto;
+    opacity: 0.6;
+    margin-bottom: 15px;
+    font-size: 40px;
+}
+
+span.plus {
+    display: none;
+}
+
+.dropzone.dz-started .dz-message {
+    display: inline-block !important;
+    width: 120px;
+    float: right;
+    border: 1px solid rgba(238, 238, 238, 0.36);
+    border-radius: 30px;
+    height: 120px;
+    margin: 16px;
+    transition: 0.2s;
+}
+
+.dropzone.dz-started .dz-message span.text {
+    display: none;
+}
+
+.dropzone.dz-started .dz-message span.plus {
+    display: block;
+    font-size: 70px;
+    color: #AAA;
+    line-height: 110px;
+}
+
+.afm-dz-close {
+    margin-top: 25px;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 768px) {
+    .afm-list-item,
+    #file-list_wrapper th,
+    .afm-square-item {
+        font-size: 24px;
+    }
+    .afm-sidebar-item {
+        font-size: 24px;
+    }
+    .afm-toolbar-item {
+        font-size: 24px;
+    }
+    .afm-new li,
+    .afm-new li button,
+    .afm-new li input,
+    .afm-new-close {
+        font-size: 24px;
     }
 }

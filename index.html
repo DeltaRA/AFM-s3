@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="plugins/DataTables/DataTables-1.10.18/css/jquery.datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="plugins/DataTables/Select-1.2.6/css/select.dataTables.min.css" />
     <link rel="stylesheet" type="text/css" href="plugins/contextMenu/jquery.contextMenu.min.css">
+    <link rel="stylesheet" type="text/css" href="plugins/dropzone/min/dropzone.min.css">
 </head>
 
 <body style="width: 80%; margin: 0 auto;">
@@ -48,7 +49,7 @@
                 <img src="img/icons/icons8-download.png" />
                 <span>Download</span>
             </div>
-            <div class="afm-toolbar-item">
+            <div class="afm-toolbar-item" onclick="openUpload()">
                 <img src="img/icons/icons8-upload.png" />
                 <span>Upload</span>
             </div>
@@ -66,6 +67,19 @@
             </div>
         </div>
         <div id="afm-content">
+            <div id="afm-dropzone">
+                <i class="fas fa-times afm-right afm-dz-close" onclick="closeUpload()"></i>
+                <form action="/api/upload.php" class="dropzone needsclick" id="dz-upload">
+                    <span id="tmp-path"></span>
+                    <div class="dz-message needsclick">
+                        <span class="text">
+                                <i class="fas fa-file-upload"></i>
+                            Drop files here or click to upload.
+                            </span>
+                        <span class="plus">+</span>
+                    </div>
+                </form>
+            </div>
             <div id="afm-square">
             </div>
             <table id="file-list" class="hover row-border">
@@ -87,6 +101,7 @@
 <script type="text/javascript" src="plugins/DataTables/Select-1.2.6/js/dataTables.select.min.js"></script>
 <script type="text/javascript" src="plugins/contextMenu/jquery.contextMenu.min.js"></script>
 <script type="text/javascript" src="plugins/contextMenu/jquery.ui.position.min.js"></script>
+<script type="text/javascript" src="plugins/dropzone/min/dropzone.min.js"></script>
 <script type="text/javascript" src="js/afm.js"></script>
 
 </html>
