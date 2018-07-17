@@ -2,18 +2,18 @@
 
 require '../vendor/aws-autoloader.php';
 
-include 'key.php';
+include 'access_credentials.php';
 
 use Aws\S3\S3Client;
 
-//Inizializzo il framework AWS SDK
+
 $s3 = S3Client::factory(array(
     'credentials' => [
         'key' => $access_key,
         'secret' => $access_secret,
     ],
-    'region' => 'eu-central-1',
+    'region' => $region,
     'version' => "latest",
 ));
 
-$bucket = "afm-s3";
+

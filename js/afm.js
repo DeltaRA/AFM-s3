@@ -1,4 +1,4 @@
-// initialisation
+// Variable
 /********************************/
 var viewMode = 0; // 0 = List, 1 = Square
 var dataTable, json, json_tmp, myDropzone;
@@ -9,7 +9,8 @@ var uploadFolder = Math.random().toString(36).substr(2, 9);
 var filesToUpload = 0;
 
 
-
+// initialisation
+/********************************/
 $(document).ready(function() {
     $.getJSON("api/getData.php", function(data) {
         json = data;
@@ -509,9 +510,6 @@ function download() {
     } else if (viewMode == 1) {
         var selected = document.getElementsByClassName("afm-square-selected");
     }
-
-    link.setAttribute('download', null);
-    link.setAttribute('target', '_blank');
     link.style.display = 'none';
     document.body.appendChild(link);
 
@@ -524,7 +522,7 @@ function download() {
             }, function(result) {
                 var tmp = path.split('/');
                 link.setAttribute('download', tmp[tmp.length - 1]);
-                link.setAttribute('href', result);
+                link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(result));
                 link.click();
             });
         } else {
